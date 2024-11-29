@@ -3,30 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>구대 소싱 계산기</title>
+    <title>구대 소싱 및 마진 계산기</title>
     <style>
         body {
             font-family: 'Malgun Gothic', sans-serif;
+            text-align: center;
             padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
         }
-        .calculators-container {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            width: 100%;
-            max-width: 600px;
-        }
-        .calculator {
+        .container {
+            max-width: 500px;
+            margin: 0 auto 20px auto;
             padding: 20px;
             border: 1px solid #ddd;
             border-radius: 10px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            background-color: #f9f9f9;
         }
-        input {
+        input, select {
             width: 100%;
             padding: 10px;
             margin: 10px 0;
@@ -46,19 +38,17 @@
             font-size: 20px;
             font-weight: bold;
         }
+        .result span {
+            color: red;
+        }
     </style>
     <script>
-        // 공통 함수: 숫자를 천 단위 콤마로 포맷
+        // 공통 함수: 숫자 천 단위 포맷
         function formatNumber(num) {
             return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         }
 
-        // 500 단위 올림
-        function roundUpToNearest500(num) {
-            return Math.ceil(num / 500) * 500;
-        }
-
-        // 계산기 1: 소싱 계산
+        // 첫 번째 계산기: 구대 소싱 계산
         function calculateSourcing() {
             const competitorPrice = parseFloat(document.getElementById('competitor_price').value);
             const localPrice = parseFloat(document.getElementById('local_price').value);
@@ -69,76 +59,94 @@
             }
 
             let expectedPrice = localPrice * 192 + localPrice * 192 * 0.05;
-            expectedPrice = roundUpToNearest500(expectedPrice);
+            expectedPrice = Math.ceil(expectedPrice / 500) * 500;
             const profit = Math.floor(competitorPrice - expectedPrice);
 
             document.getElementById('expected_price').textContent = formatNumber(expectedPrice) + " 원";
             document.getElementById('profit').textContent = formatNumber(profit) + " 원";
         }
 
-        // 계산기 2: 단순 가격 계산
-        function calculateSimple() {
-            const price1 = parseFloat(document.getElementById('price1').value);
-            const price2 = parseFloat(document.getElementById('price2').value);
+        // 두 번째 계산기: 마진 계산
+        function calculateProfit() {
+            const exchangeRate = parseFloat(document.getElementById('exchange_rate').value);
+            const sellingPrice = parseFloat(document.getElementById('selling_price').value.replace(/,/g, ""));
+            const taobaoPrice = parseFloat(document.getElementById('taobao_price').value.replace(/,/g, ""));
+            const selectedWeight = parseFloat(document.getElementById('weight').value);
 
-            if (isNaN(price1) || isNaN(price2)) {
+            if (isNaN(exchangeRate) || isNaN(sellingPrice) || isNaN(taobaoPrice) || isNaN(selectedWeight)) {
                 alert('숫자를 올바르게 입력해주세요.');
                 return;
             }
 
-            const total = price1 + price2;
-            document.getElementById('total_price').textContent = formatNumber(total) + " 원";
+            const shippingCosts = {
+                0.5: 4700, 1: 5050, 1.5: 5750, 2: 6450, 2.5: 7150, 3: 7850,
+                // 추가 데이터 필요 시 확장 가능
+                30: 42300
+            };
+
+            const shippingCost = shippingCosts[selectedWeight] || 0;
+            const profit = sellingPrice - (sellingPrice * 0.05) - (taobaoPrice * exchangeRate * 1.077) - shippingCost;
+
+            const resultElement = document.getElementById('profit_second');
+            resultElement.textContent = formatNumber(profit) + " 원";
+            resultElement.style.color = profit >= 0 ? "red" : "blue";
         }
 
         // 필드 초기화
-        function resetCalculator(idPrefix) {
-            const inputs = document.querySelectorAll(`#${idPrefix} input`);
-            inputs.forEach(input => input.value = '');
-            const results = document.querySelectorAll(`#${idPrefix} .result span`);
-            results.forEach(result => result.textContent = '-');
+        function resetFields(prefix) {
+            document.querySelectorAll(`#${prefix} input, #${prefix} select`).forEach(el => el.value = '');
+            document.querySelectorAll(`#${prefix} .result span`).forEach(span => span.textContent = '-');
         }
     </script>
 </head>
 <body>
-    <div class="calculators-container">
-        <!-- 첫 번째 계산기 -->
-        <div class="calculator" id="calculator1">
-            <h2>구대 소싱 계산기</h2>
-            <form onsubmit="event.preventDefault(); calculateSourcing();">
-                <label for="competitor_price">경쟁사 판매가 (원):</label>
-                <input type="text" id="competitor_price" placeholder="숫자 입력" required>
+    <!-- 첫 번째 계산기 -->
+    <div class="container" id="calculator1">
+        <h1>구대 소싱 계산기</h1>
+        <form onsubmit="event.preventDefault(); calculateSourcing();">
+            <label for="competitor_price">경쟁사 판매가 (원):</label>
+            <input type="text" id="competitor_price" placeholder="숫자 입력" required>
 
-                <label for="local_price">현지 구매가 (위안):</label>
-                <input type="text" id="local_price" placeholder="숫자 입력" required>
+            <label for="local_price">현지 구매가 (위안):</label>
+            <input type="text" id="local_price" placeholder="숫자 입력" required>
 
-                <button type="submit">계산</button>
-            </form>
+            <button type="submit">계산</button>
+        </form>
 
-            <div class="result">
-                <p>예상판매가: <span id="expected_price">-</span></p>
-                <p>판매가 더하기: <span id="profit" style="color: red;">-</span></p>
-            </div>
-            <button onclick="resetCalculator('calculator1')">Reset</button>
+        <div class="result">
+            <p>예상판매가: <span id="expected_price">-</span></p>
+            <p>판매가 더하기: <span id="profit">-</span></p>
         </div>
+        <button onclick="resetFields('calculator1')">Reset</button>
+    </div>
 
-        <!-- 두 번째 계산기 -->
-        <div class="calculator" id="calculator2">
-            <h2>단순 가격 계산기</h2>
-            <form onsubmit="event.preventDefault(); calculateSimple();">
-                <label for="price1">가격 1 (원):</label>
-                <input type="text" id="price1" placeholder="숫자 입력" required>
+    <!-- 두 번째 계산기 -->
+    <div class="container" id="calculator2">
+        <h1>중구대 마진 계산기</h1>
+        <form onsubmit="event.preventDefault(); calculateProfit();">
+            <label for="exchange_rate">환율:</label>
+            <select id="exchange_rate">
+                ${Array.from({ length: 13 }, (_, i) => `<option value="${170 + i * 5}">${170 + i * 5}</option>`).join('')}
+            </select>
 
-                <label for="price2">가격 2 (원):</label>
-                <input type="text" id="price2" placeholder="숫자 입력" required>
+            <label for="selling_price">판매가 (원):</label>
+            <input type="text" id="selling_price" placeholder="숫자 입력" required>
 
-                <button type="submit">계산</button>
-            </form>
+            <label for="taobao_price">타오바오 가격:</label>
+            <input type="text" id="taobao_price" placeholder="숫자 입력" required>
 
-            <div class="result">
-                <p>합계: <span id="total_price">-</span></p>
-            </div>
-            <button onclick="resetCalculator('calculator2')">Reset</button>
+            <label for="weight">무게 (kg):</label>
+            <select id="weight">
+                ${Array.from({ length: 60 }, (_, i) => `<option value="${(i + 1) / 2}">${(i + 1) / 2}</option>`).join('')}
+            </select>
+
+            <button type="submit">계산</button>
+        </form>
+
+        <div class="result">
+            <p>예상 순익: <span id="profit_second">-</span></p>
         </div>
+        <button onclick="resetFields('calculator2')">Reset</button>
     </div>
 </body>
 </html>
