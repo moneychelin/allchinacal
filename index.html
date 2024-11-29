@@ -128,7 +128,6 @@
         <form onsubmit="event.preventDefault(); calculateProfit();">
             <label for="exchange_rate">환율:</label>
             <select id="exchange_rate">
-                <!-- 환율 옵션: 170~230, 5 단위 -->
                 <option value="170">170</option>
                 <option value="175">175</option>
                 <option value="180">180</option>
@@ -153,7 +152,36 @@
             <label for="weight">무게 (kg):</label>
             <select id="weight">
                 <!-- 무게 옵션: 1~30 -->
-                ${Array.from({ length: 30 }, (_, i) => `<option value="${i + 1}">${i + 1} kg</option>`).join('')}
+                <option value="1">1 kg</option>
+                <option value="2">2 kg</option>
+                <option value="3">3 kg</option>
+                <option value="4">4 kg</option>
+                <option value="5">5 kg</option>
+                <option value="6">6 kg</option>
+                <option value="7">7 kg</option>
+                <option value="8">8 kg</option>
+                <option value="9">9 kg</option>
+                <option value="10">10 kg</option>
+                <option value="11">11 kg</option>
+                <option value="12">12 kg</option>
+                <option value="13">13 kg</option>
+                <option value="14">14 kg</option>
+                <option value="15">15 kg</option>
+                <option value="16">16 kg</option>
+                <option value="17">17 kg</option>
+                <option value="18">18 kg</option>
+                <option value="19">19 kg</option>
+                <option value="20">20 kg</option>
+                <option value="21">21 kg</option>
+                <option value="22">22 kg</option>
+                <option value="23">23 kg</option>
+                <option value="24">24 kg</option>
+                <option value="25">25 kg</option>
+                <option value="26">26 kg</option>
+                <option value="27">27 kg</option>
+                <option value="28">28 kg</option>
+                <option value="29">29 kg</option>
+                <option value="30">30 kg</option>
             </select>
 
             <button type="submit">계산</button>
