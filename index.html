@@ -158,8 +158,9 @@
 
             <label for="weight">무게 (kg):</label>
             <select id="weight" onchange="calculateProfit()">
+                <!-- 명시적으로 무게 옵션 추가 -->
                 <option value="">선택</option>
-                ${Array.from({ length: 60 }, (_, i) => {
+                ${[...Array(60)].map((_, i) => {
                     const weight = (i + 1) * 0.5;
                     return `<option value="${weight}">${weight.toFixed(1)} kg</option>`;
                 }).join("")}
