@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>두 개의 계산기</title>
+    <style>
+        body {
+            font-family: '나눔고딕', sans-serif;
+            margin: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .calculators-container {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 20px;
+            max-width: 1200px;
+            width: 100%;
+        }
+        .calculator {
+            width: 45%;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            background-color: #f9f9f9;
+            flex-grow: 1;
+        }
+        h2 {
+            text-align: center;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        .result {
+            margin-top: 20px;
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>두 개의 계산기</h1>
+    <div class="calculators-container">
+        <!-- 첫 번째 계산기 -->
+        <div class="calculator" id="calculator1">
+            <h2>계산기 1</h2>
+            <label for="calc1_exchange_rate">환율:</label>
+            <select id="calc1_exchange_rate"></select>
+            <label for="calc1_selling_price">판매가 (원):</label>
+            <input type="text" id="calc1_selling_price" placeholder="숫자 입력">
+            <label for="calc1_taobao_price">타오바오 가격:</label>
+            <input type="text" id="calc1_taobao_price" placeholder="숫자 입력">
+            <label for="calc1_weight">무게 (kg):</label>
+            <select id="calc1_weight"></select>
+            <div class="result" id="calc1_result">예상 순익: -</div>
+            <button onclick="calculateProfit(1)">계산</button>
+            <button onclick="resetFields(1)">Reset</button>
+        </div>
+
+        <!-- 두 번째 계산기 -->
+        <div class="calculator" id="calculator2">
+            <h2>계산기 2</h2>
+            <label for="calc2_exchange_rate">환율:</label>
+            <select id="calc2_exchange_rate"></select>
+            <label for="calc2_selling_price">판매가 (원):</label>
+            <input type="text" id="calc2_selling_price" placeholder="숫자 입력">
+            <label for="calc2_taobao_price">타오바오 가격:</label>
+            <input type="text" id="calc2_taobao_price" placeholder="숫자 입력">
+            <label for="calc2_weight">무게 (kg):</label>
+            <select id="calc2_weight"></select>
+            <div class="result" id="calc2_result">예상 순익: -</div>
+            <button onclick="calculateProfit(2)">계산</button>
+            <button onclick="resetFields(2)">Reset</button>
+        </div>
+    </div>
+
+    <script>
+        // 배송비 데이터
+        const shippingCosts = {
+            0.5: 4700, 1: 5050, 1.5: 5750, 2: 6450, 2.5: 7150, 3: 7850, 3.5: 8550, 4: 9250, 4.5: 9950, 5: 10650,
+            5.5: 11350, 6: 12050, 6.5: 12750, 7: 13450, 7.5: 14150, 8: 14850, 8.5: 15550, 9: 16250, 9.5: 16950, 10: 17650,
+            10.5: 18350, 11: 18900, 11.5: 19450, 12: 20000, 12.5: 20550, 13: 21100, 13.5: 21650, 14: 22200, 14.5: 22750,
+            15: 23300, 15.5: 23850, 16: 24400, 16.5: 24950, 17: 25500, 17.5: 26050, 18: 26600, 18.5: 27150, 19: 27700, 19.5: 28250,
+            20: 28800, 20.5: 31850, 21: 32400, 21.5: 32950, 22: 33500, 22.5: 34050, 23: 34600, 23.5: 35150, 24: 35700,
+            24.5: 36250, 25: 36800, 25.5: 37350, 26: 37900, 26.5: 38450, 27: 39000, 27.5: 39550, 28: 40100, 28.5: 40650,
+            29: 41200, 29.5: 41750, 30: 42300,
+        };
+
+        // 환율 및 무게 선택 옵션 추가
+        function populateSelectOptions() {
+            const exchangeRates = Array.from({ length: 13 }, (_, i) => 170 + i * 5);
+            const weights = Array.from({ length: 60 }, (_, i) => (i + 1) / 2);
+
+            ['calc1', 'calc2'].forEach(calc => {
+                const rateSelect = document.getElementById(`${calc}_exchange_rate`);
+                const weightSelect = document.getElementById(`${calc}_weight`);
+
+                exchangeRates.forEach(rate => {
+                    const option = document.createElement('option');
+                    option.value = rate;
+                    option.textContent = rate;
+                    rateSelect.appendChild(option);
+                });
+
+                weights.forEach(weight => {
+                    const option = document.createElement('option');
+                    option.value = weight;
+                    option.textContent = weight;
+                    weightSelect.appendChild(option);
+                });
+            });
+        }
+
+        // 순익 계산 함수
+        function calculateProfit(calcNumber) {
+            const exchangeRate = parseFloat(document.getElementById(`calc${calcNumber}_exchange_rate`).value);
+            const sellingPrice = parseFloat(document.getElementById(`calc${calcNumber}_selling_price`).value.replace(/,/g, ""));
+            const taobaoPrice = parseFloat(document.getElementById(`calc${calcNumber}_taobao_price`).value.replace(/,/g, ""));
+            const weight = parseFloat(document.getElementById(`calc${calcNumber}_weight`).value);
+
+            if (isNaN(sellingPrice) || isNaN(taobaoPrice) || isNaN(weight)) {
+                document.getElementById(`calc${calcNumber}_result`).textContent = "잘못된 입력입니다.";
+                return;
+            }
+
+            const shippingCost = shippingCosts[weight] || 0;
+            const profit = sellingPrice - (sellingPrice * 0.05) - (taobaoPrice * exchangeRate * 1.077) - shippingCost;
+
+            const resultElement = document.getElementById(`calc${calcNumber}_result`);
+            resultElement.textContent = `예상 순익: ${profit.toLocaleString()} 원`;
+            resultElement.style.color = profit >= 0 ? "red" : "blue";
+        }
+
+        // 필드 초기화 함수
+        function resetFields(calcNumber) {
+            document.getElementById(`calc${calcNumber}_selling_price`).value = "";
+            document.getElementById(`calc${calcNumber}_taobao_price`).value = "";
+            document.getElementById(`calc${calcNumber}_weight`).value = "";
+            document.getElementById(`calc${calcNumber}_result`).textContent = "예상 순익: -";
+        }
+
+        // 숫자 입력 필드 포맷팅
+        document.querySelectorAll("input").forEach(input => {
+            input.addEventListener("input", (e) => {
+                const value = e.target.value.replace(/,/g, "");
+                if (!isNaN(value) && value !== "") {
+                    e.target.value = parseFloat(value).toLocaleString();
+                }
+            });
+        });
+
+        // 초기화
+        populateSelectOptions();
+    </script>
+</body>
+</html>
