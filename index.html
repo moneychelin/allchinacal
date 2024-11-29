@@ -78,13 +78,11 @@
                 return;
             }
 
-            const shippingCosts = {
-                1: 4700, 2: 5050, 3: 5750, 4: 6450, 5: 7150, 6: 7850,
-                7: 8550, 8: 9250, 9: 9950, 10: 10650, 11: 11350, 12: 12050,
-                13: 12750, 14: 13450, 15: 14150, 16: 14850, 17: 15550, 18: 16250,
-                19: 16950, 20: 17650, 21: 18350, 22: 18900, 23: 19450, 24: 20000,
-                25: 20550, 26: 21100, 27: 21650, 28: 22200, 29: 22750, 30: 23300
-            };
+            const shippingCosts = {};
+            for (let i = 1; i <= 60; i++) {
+                const weight = i * 0.5;
+                shippingCosts[weight] = 4700 + (i - 1) * 350; // 예시 배송비 계산
+            }
 
             const shippingCost = shippingCosts[selectedWeight] || 0;
             const profit = sellingPrice - (sellingPrice * 0.05) - (taobaoPrice * exchangeRate * 1.077) - shippingCost;
@@ -151,37 +149,10 @@
 
             <label for="weight">무게 (kg):</label>
             <select id="weight">
-                <!-- 무게 옵션: 1~30 -->
-                <option value="1">1 kg</option>
-                <option value="2">2 kg</option>
-                <option value="3">3 kg</option>
-                <option value="4">4 kg</option>
-                <option value="5">5 kg</option>
-                <option value="6">6 kg</option>
-                <option value="7">7 kg</option>
-                <option value="8">8 kg</option>
-                <option value="9">9 kg</option>
-                <option value="10">10 kg</option>
-                <option value="11">11 kg</option>
-                <option value="12">12 kg</option>
-                <option value="13">13 kg</option>
-                <option value="14">14 kg</option>
-                <option value="15">15 kg</option>
-                <option value="16">16 kg</option>
-                <option value="17">17 kg</option>
-                <option value="18">18 kg</option>
-                <option value="19">19 kg</option>
-                <option value="20">20 kg</option>
-                <option value="21">21 kg</option>
-                <option value="22">22 kg</option>
-                <option value="23">23 kg</option>
-                <option value="24">24 kg</option>
-                <option value="25">25 kg</option>
-                <option value="26">26 kg</option>
-                <option value="27">27 kg</option>
-                <option value="28">28 kg</option>
-                <option value="29">29 kg</option>
-                <option value="30">30 kg</option>
+                ${Array.from({ length: 60 }, (_, i) => {
+                    const weight = (i + 1) * 0.5;
+                    return `<option value="${weight}">${weight.toFixed(1)} kg</option>`;
+                }).join('')}
             </select>
 
             <button type="submit">계산</button>
