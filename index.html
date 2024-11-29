@@ -43,7 +43,7 @@
         }
     </style>
     <script>
-        // 공통 함수: 숫자 천 단위 포맷
+        // 숫자 천 단위 포맷 함수
         function formatNumber(num) {
             return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         }
@@ -128,10 +128,20 @@
         <form onsubmit="event.preventDefault(); calculateProfit();">
             <label for="exchange_rate">환율:</label>
             <select id="exchange_rate">
-                ${Array.from({ length: 13 }, (_, i) => {
-                    const rate = 170 + i * 5;
-                    return `<option value="${rate}">${rate}</option>`;
-                }).join('')}
+                <!-- 환율 옵션: 170~230, 5 단위 -->
+                <option value="170">170</option>
+                <option value="175">175</option>
+                <option value="180">180</option>
+                <option value="185">185</option>
+                <option value="190">190</option>
+                <option value="195">195</option>
+                <option value="200">200</option>
+                <option value="205">205</option>
+                <option value="210">210</option>
+                <option value="215">215</option>
+                <option value="220">220</option>
+                <option value="225">225</option>
+                <option value="230">230</option>
             </select>
 
             <label for="selling_price">판매가 (원):</label>
@@ -142,10 +152,8 @@
 
             <label for="weight">무게 (kg):</label>
             <select id="weight">
-                ${Array.from({ length: 30 }, (_, i) => {
-                    const weight = i + 1;
-                    return `<option value="${weight}">${weight} kg</option>`;
-                }).join('')}
+                <!-- 무게 옵션: 1~30 -->
+                ${Array.from({ length: 30 }, (_, i) => `<option value="${i + 1}">${i + 1} kg</option>`).join('')}
             </select>
 
             <button type="submit">계산</button>
