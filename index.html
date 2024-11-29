@@ -80,8 +80,12 @@
 
             const shippingCosts = {
                 0.5: 4700, 1: 5050, 1.5: 5750, 2: 6450, 2.5: 7150, 3: 7850,
-                // 추가 데이터 필요 시 확장 가능
-                30: 42300
+                3.5: 8550, 4: 9250, 4.5: 9950, 5: 10650, 5.5: 11350, 6: 12050,
+                6.5: 12750, 7: 13450, 7.5: 14150, 8: 14850, 8.5: 15550, 9: 16250,
+                9.5: 16950, 10: 17650, 10.5: 18350, 11: 18900, 11.5: 19450, 12: 20000,
+                12.5: 20550, 13: 21100, 13.5: 21650, 14: 22200, 14.5: 22750, 15: 23300,
+                15.5: 23850, 16: 24400, 16.5: 24950, 17: 25500, 17.5: 26050, 18: 26600,
+                18.5: 27150, 19: 27700, 19.5: 28250, 20: 28800
             };
 
             const shippingCost = shippingCosts[selectedWeight] || 0;
@@ -126,7 +130,10 @@
         <form onsubmit="event.preventDefault(); calculateProfit();">
             <label for="exchange_rate">환율:</label>
             <select id="exchange_rate">
-                ${Array.from({ length: 13 }, (_, i) => `<option value="${170 + i * 5}">${170 + i * 5}</option>`).join('')}
+                ${Array.from({ length: 13 }, (_, i) => {
+                    const rate = 170 + i * 5;
+                    return `<option value="${rate}">${rate}</option>`;
+                }).join('')}
             </select>
 
             <label for="selling_price">판매가 (원):</label>
@@ -137,7 +144,10 @@
 
             <label for="weight">무게 (kg):</label>
             <select id="weight">
-                ${Array.from({ length: 60 }, (_, i) => `<option value="${(i + 1) / 2}">${(i + 1) / 2}</option>`).join('')}
+                ${Array.from({ length: 40 }, (_, i) => {
+                    const weight = (i + 1) / 2;
+                    return `<option value="${weight.toFixed(1)}">${weight.toFixed(1)}</option>`;
+                }).join('')}
             </select>
 
             <button type="submit">계산</button>
